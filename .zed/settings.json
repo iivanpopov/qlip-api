@@ -1,0 +1,19 @@
+{
+  "format_on_save": "on",
+  "prettier": { "allowed": false },
+  "formatter": [{ "language_server": { "name": "oxfmt" } }],
+  "languages": {
+    "TypeScript": {
+      "language_servers": [
+        "...",
+        "!oxlint",
+        "!vtsls",
+        "!typescript-language-server",
+        "!stylelint-lsp",
+        "!unocss-language-server",
+        "!eslint",
+        "!tailwindcss-language-server"
+      ]
+    }
+  }
+}

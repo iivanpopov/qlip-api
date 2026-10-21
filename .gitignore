@@ -1,0 +1,6 @@
+# prod
+dist/
+node_modules/
+.wrangler
+.env
+.env.development
