@@ -9,16 +9,15 @@
     "prepare": "lefthook install"
   },
   "dependencies": {
+    "@hono/cloudflare-workers": "^1.0.1",
     "@hono/standard-validator": "^0.4.0",
     "@logtape/hono": "^2.4.2",
     "@logtape/logtape": "^2.4.2",
-    "@scalar/hono-api-reference": "^0.12.13",
     "hono": "^4.13.13",
-    "hono-openapi": "^1.5.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.3",
+    "@types/node": "^26.6.5",
     "lefthook": "^2.2.2",
     "oxfmt": "^0.73.0",
     "typescript": "^7.0.2",

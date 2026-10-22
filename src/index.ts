@@ -1,21 +1,42 @@
-import { honoLogger } from "@logtape/hono";
-import { Scalar } from "@scalar/hono-api-reference";
-import { Hono } from "hono";
-import { openAPIRouteHandler } from "hono-openapi";
+import { sValidator } from '@hono/standard-validator'
+import { honoLogger } from '@logtape/hono'
+import { Hono } from 'hono'
+import z from 'zod'
 
-import "./lib/logger";
+import { Room } from './room'
+import './logger'
 
-const app = new Hono();
+export { Room }
 
-app.use(honoLogger({ category: ["robocoins", "http"], context: true }));
+interface Env {
+  Bindings: {
+    ROOM: DurableObjectNamespace<Room>
+  }
+}
 
-app.get("/", (c) => c.redirect("/docs"));
+const app = new Hono<Env>()
+
+app.use(honoLogger({ context: true }))
+
+const JoinRoomParamSchema = z.object({ code: z.string().length(5) })
+type JoinRoomParamSchema = z.infer<typeof JoinRoomParamSchema>
+
+const JoinRoomSearchSchema = z.object({ clientId: z.string() })
+type JoinRoomSearchSchema = z.infer<typeof JoinRoomSearchSchema>
+
 app.get(
-  "/openapi",
-  openAPIRouteHandler(app, {
-    documentation: { info: { title: "Robocoins Services", version: "1.0.0" } },
-  }),
-);
-app.get("/docs", Scalar({ url: "/openapi" }));
+  '/:code',
+  sValidator('param', JoinRoomParamSchema),
+  sValidator('query', JoinRoomSearchSchema),
+  async (c) => {
+    if (c.req.header('Upgrade') !== 'websocket') return c.body(null, 426)
 
-export default app;
+    const param = c.req.valid('param')
+
+    const room = c.env.ROOM.getByName(param.code)
+
+    return room.fetch(c.req.raw)
+  },
+)
+
+export default app

@@ -2,5 +2,5 @@ pre-commit:
   piped: true
   jobs:
     - name: fmt
-      run: bun x oxfmt --no-error-on-unmatched-pattern {staged_files}
+      run: pnpx oxfmt --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
