@@ -1,22 +1,39 @@
 import { sValidator } from '@hono/standard-validator'
 import { honoLogger } from '@logtape/hono'
-import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { ofetch } from 'ofetch'
 import z from 'zod'
 
-import { Room } from './room'
-import './logger'
+import { CREDENTIALS_URL } from '#/constants'
+import { Exception } from '#/lib/exception'
+import { hono } from '#/lib/hono'
+import { logger } from '#/lib/logger'
+import { Room } from '#/objects/room'
 
-export { Room }
+import { rateLimit } from './middleware/rate-limit'
 
-interface Env {
-  Bindings: {
-    ROOM: DurableObjectNamespace<Room>
-  }
-}
+const app = hono.createApp()
 
-const app = new Hono<Env>()
-
+app.use(cors())
 app.use(honoLogger({ context: true }))
+
+app.onError((error) => {
+  if (error instanceof Exception) return error.toResponse()
+  logger.error(error)
+  return Exception.InternalServerError().toResponse()
+})
+
+app.get('/ice', rateLimit, async (c) => {
+  const { iceServers } = await ofetch(CREDENTIALS_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${c.env.TURN_TOKEN}`,
+    },
+    body: { ttl: 3600 },
+  })
+
+  return c.json(iceServers)
+})
 
 const JoinRoomParamSchema = z.object({ code: z.string().length(5) })
 type JoinRoomParamSchema = z.infer<typeof JoinRoomParamSchema>
@@ -39,4 +56,5 @@ app.get(
   },
 )
 
+export { Room }
 export default app

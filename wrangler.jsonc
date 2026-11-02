@@ -9,5 +9,18 @@
   "exports": {
     "Room": { "type": "durable-object", "storage": "sqlite" },
   },
+  "secrets": {
+    "required": ["TURN_TOKEN"],
+  },
+  "ratelimits": [
+    {
+      "name": "RATE_LIMITER",
+      "namespace_id": "1",
+      "simple": {
+        "limit": 10,
+        "period": 60,
+      },
+    },
+  ],
   "previews": {},
 }

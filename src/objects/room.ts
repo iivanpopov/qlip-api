@@ -1,6 +1,7 @@
 import { DurableObject } from 'cloudflare:workers'
 
-import { logger } from './logger'
+import { Exception } from '#/lib/exception'
+import { logger } from '#/lib/logger'
 
 export class Room extends DurableObject {
   async fetch(request: Request) {
@@ -13,7 +14,7 @@ export class Room extends DurableObject {
 
     const previous = opened.find((socket) => socket.deserializeAttachment().clientId === clientId)
 
-    if (opened.length === 2 && !previous) return new Response('Room Is Full', { status: 400 })
+    if (opened.length === 2 && !previous) return Exception.BadRequest('ROOM_FULL').toResponse()
 
     if (previous) {
       previous.close()
@@ -46,8 +47,6 @@ export class Room extends DurableObject {
           socket.deserializeAttachment().clientId !== sender.clientId,
       )
     if (!other) return
-
-    logger.info(sender.clientId, message)
 
     other.send(message)
   }
