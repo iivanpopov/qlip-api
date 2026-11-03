@@ -50,4 +50,9 @@ export class Room extends DurableObject {
 
     other.send(message)
   }
+
+  webSocketClose(ws: WebSocket) {
+    if (ws.readyState !== WebSocket.CLOSING) return
+    ws.close(1000)
+  }
 }
